@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <dirent.h>
-#include<sys/wait.h>
+#include <sys/wait.h>
 
 void test(int ID, int pid);
 
@@ -31,7 +31,7 @@ int main(int argc, char ** args) {
     int i = 0;
     while(i < NPROC) {
         // parent process fork child process
-        if ((cpids[0] = fork()) == 0) {
+        if ((cpids[i] = fork()) == 0) {
             // child process jump to child section
             goto child;
         } else {
