@@ -29,9 +29,10 @@ int main(int argc, char ** args) {
     NTHRD = atoi(args[2]);
     STR = args[3];
 
+    // parallelism for file search
     omp_set_nested(1);
     omp_set_num_threads(NPROC);
-    #pragma omp parallel
+    #pragma omp parallel 
     {
         int ID = omp_get_thread_num();
         printf("this is from process(%d): ", ID);
@@ -41,6 +42,7 @@ int main(int argc, char ** args) {
 }
 
 void test(int ID) {
+    // parallelism for string search in a file
     omp_set_num_threads(NTHRD);
     #pragma omp parallel
     {
