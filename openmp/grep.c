@@ -7,6 +7,8 @@
 
 void test(int ID, int pid);
 
+#define BLOCK 4096
+
 int main(int argc, char ** args) {
 
     pid_t * cpids;
@@ -14,6 +16,8 @@ int main(int argc, char ** args) {
     int NTHRD;
     char * STR;
     DIR * dir;
+    char buffer[BLOCK];
+    char * filename;
     
     if (argc < 4) {
         printf("Usage : ./grep n-process n-thread string\n");
