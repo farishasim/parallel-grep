@@ -6,9 +6,6 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <fcntl.h>
-#include <errno.h>
-
-void test(int ID);
 
 #define FILESIZE 4096
 #define BLOCK 256
@@ -17,15 +14,15 @@ int NPROC;
 int NTHRD;
 
 // List definition
-typedef int fd;
+typedef int filed;
 typedef struct tNode* ptr;
 typedef struct tNode {
-    fd info;    // file descriptor
+    filed info;    // file descriptor
     ptr next;   // next pointer
 } Node ;
 typedef ptr List;
 
-ptr AlokNode(fd info) {
+ptr AlokNode(filed info) {
     ptr P = (ptr) malloc (sizeof(Node));
     P->info = info;
     P->next = NULL;
@@ -72,7 +69,7 @@ List listing(char * path) {
 int searchFile(char * text, char * pattern, int length) {
     // length : of text
     int i,j;
-    for(i = 0; i< length; i++) {
+    for(i = 0; i < length; i++) {
         for(j = 0; pattern[j] != '\0'; j++) {
             if (text[i+j] != pattern[j]) break;
         }
@@ -89,19 +86,18 @@ int main(int argc, char ** args) {
     char * filename;
     ptr P; List L;
     int child;
-    fd no; 
+    filed fd; 
     
     if (argc < 4) {
         printf("Usage : ./grep n-process n-thread string\n");
         exit(0);
     }
 
-    L = listing(".");
-
     //*** INIT SECTION ***//    
     NPROC = atoi(args[1]);
     NTHRD = atoi(args[2]);
     STR = args[3];
+    L = listing(".");
 
     //*** PARENT SECTION ***//
     P = L; child = 0;
@@ -121,6 +117,7 @@ int main(int argc, char ** args) {
         P = P->next;
     }
 
+    // wait all child to return
     while(child > 0) {
         int stat; pid_t cid;
         cid = wait(&stat);
@@ -131,13 +128,13 @@ int main(int argc, char ** args) {
     
     //*** CHILD SECTION ***//
     child:
-    no = P->info;
-    FILE *fp = fdopen(no, "rb");
+    fd = P->info;
+    FILE *fp = fdopen(fd, "rb");
     fread(buffer, 1, FILESIZE, fp);
-    if (searchFile(buffer, "omp.h", FILESIZE)) {
+    if (searchFile(buffer, STR, FILESIZE)) {
         char filePath[BLOCK];
         char result[BLOCK];
-        sprintf(filePath, "/proc/self/fd/%d", no);
+        sprintf(filePath, "/proc/self/fd/%d", fd);
         memset(result, 0, sizeof(result));
         readlink(filePath, result, sizeof(result));
         printf("%s\n", result);
