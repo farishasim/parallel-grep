@@ -10,10 +10,8 @@
 
 void test(int ID);
 
-#define BLOCK 4096
-#define NORMAL_COLOR  "\x1B[0m"
-#define GREEN  "\x1B[32m"
-#define BLUE  "\x1B[34m"
+#define FILESIZE 4096
+#define BLOCK 256
 
 int NPROC;
 int NTHRD;
@@ -80,7 +78,7 @@ int main(int argc, char ** args) {
 
     char * STR;
     DIR * dir;
-    char buffer[BLOCK];
+    char buffer[FILESIZE];
     char * filename;
     ptr P; List L;
     int child;
@@ -126,10 +124,10 @@ int main(int argc, char ** args) {
     
     //*** CHILD SECTION ***//
     child:
-        no = P->info;
-        FILE *fp = fdopen(no, "rb");
-        fread(buffer, 1, BLOCK, fp);
-        printf("%s", buffer);
+    no = P->info;
+    FILE *fp = fdopen(no, "rb");
+    fread(buffer, 1, FILESIZE, fp);
+    printf("%s", buffer);
 
     return 0;
 }
