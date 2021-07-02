@@ -71,6 +71,11 @@ List listing(char * path) {
     return L;
 }
 
+int searchFile(char * text, char * pattern, int length) {
+    // length : of text
+
+}
+
 int main(int argc, char ** args) {
 
     char * STR;
@@ -79,6 +84,7 @@ int main(int argc, char ** args) {
     char * filename;
     ptr P; List L;
     int child;
+    fd no; 
     
     if (argc < 4) {
         printf("Usage : ./grep n-process n-thread string\n");
@@ -108,24 +114,36 @@ int main(int argc, char ** args) {
             child--;
         }
         P = P->next;
-    }    
+    }
+
+    while(child > 0) {
+        int stat; pid_t cid;
+        cid = wait(&stat);
+        child--;
+    }
+    
+    exit(0);
     
     //*** CHILD SECTION ***//
     child:
+        no = P->info;
+        FILE *fp = fdopen(no, "rb");
+        fread(buffer, 1, BLOCK, fp);
+        printf("%s", buffer);
 
     return 0;
 }
 
-void test(int ID) {
-    // parallelism for string search in a file
-    omp_set_num_threads(NTHRD);
-    #pragma omp parallel
-    {
-    printf("hello(%d)", ID);
-    printf(" world(%d)\n", ID);
-    #pragma omp barrier
-    #pragma omp single
-    printf("All thread is : %d\n", omp_get_num_threads());
-    }
-    return;
-}
+// void test(int ID) {
+//     // parallelism for string search in a file
+//     omp_set_num_threads(NTHRD);
+//     #pragma omp parallel
+//     {
+//     printf("hello(%d)", ID);
+//     printf(" world(%d)\n", ID);
+//     #pragma omp barrier
+//     #pragma omp single
+//     printf("All thread is : %d\n", omp_get_num_threads());
+//     }
+//     return;
+// }
