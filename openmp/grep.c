@@ -48,9 +48,9 @@ List listing(char * path) {
     char d_path[512];
     while ((dir = readdir(d)) != NULL) {
         sprintf(d_path, "%s/%s", path, dir->d_name);
-        printf("%s\n", d_path);
         if (dir->d_type != DT_DIR) // for files
         {
+            printf("%s\n", d_path);
             P->next = AlokNode(fileno(fopen(d_path, "r")));
             P = P->next;
             if (!L) L = P;
@@ -59,8 +59,8 @@ List listing(char * path) {
                 && (strcmp(dir->d_name,".") != 0) 
                 && (strcmp(dir->d_name,"..") != 0))
         {
-            P->next = listing(d_path);
-            if (P->next){
+            P->next = listing(d_path); // recursive call
+            if (P->next) {
                 P = last(P->next);
                 if (!L) L = P->next;
             }
