@@ -71,7 +71,14 @@ List listing(char * path) {
 
 int searchFile(char * text, char * pattern, int length) {
     // length : of text
-
+    int i,j;
+    for(i = 0; i< length; i++) {
+        for(j = 0; pattern[j] != '\0'; j++) {
+            if (text[i+j] != pattern[j]) break;
+        }
+        if (pattern[j] == '\0') return 1; // true
+    }
+    return 0; // false
 }
 
 int main(int argc, char ** args) {
@@ -127,7 +134,14 @@ int main(int argc, char ** args) {
     no = P->info;
     FILE *fp = fdopen(no, "rb");
     fread(buffer, 1, FILESIZE, fp);
-    printf("%s", buffer);
+    if (searchFile(buffer, "omp.h", FILESIZE)) {
+        char filePath[BLOCK];
+        char result[BLOCK];
+        sprintf(filePath, "/proc/self/fd/%d", no);
+        memset(result, 0, sizeof(result));
+        readlink(filePath, result, sizeof(result));
+        printf("%s\n", result);
+    }
 
     return 0;
 }
