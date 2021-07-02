@@ -41,10 +41,10 @@ ptr last(List L) {
 }
 
 List listing(char * path) {
-    List L = NULL; ptr P = AlokNode(0); // dummy node
+    List L = NULL;
     DIR * d = opendir(path);
     if (d==NULL) return L;
-    struct dirent * dir;
+    struct dirent * dir; ptr P = AlokNode(0), Pinit = P; // dummy node
     char d_path[512];
     while ((dir = readdir(d)) != NULL) {
         sprintf(d_path, "%s/%s", path, dir->d_name);
@@ -66,6 +66,7 @@ List listing(char * path) {
             }
         }
     }
+    free(Pinit);
     closedir(d);
     return L;
 }
