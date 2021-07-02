@@ -77,21 +77,43 @@ int main(int argc, char ** args) {
     DIR * dir;
     char buffer[BLOCK];
     char * filename;
+    ptr P; List L;
+    int child;
     
     if (argc < 4) {
         printf("Usage : ./grep n-process n-thread string\n");
         exit(0);
     }
 
-    List L = listing(".");
+    L = listing(".");
 
     //*** INIT SECTION ***//    
     NPROC = atoi(args[1]);
     NTHRD = atoi(args[2]);
     STR = args[3];
 
-    // parallelism for file search
+    //*** PARENT SECTION ***//
+    P = L; child = 0;
+    while (P) {
+        pid_t cid;
+        if ((cid = fork()) == 0) {
+            // child process jump to child section
+            goto child;
+        }
+        // parent process continue forking another child
+        child++;
+        if (child == NPROC) {
+            int stat;
+            cid = wait(&stat);
+            child--;
+        }
+        P = P->next;
+    }    
+    
+    //*** CHILD SECTION ***//
+    child:
 
+    return 0;
 }
 
 void test(int ID) {
