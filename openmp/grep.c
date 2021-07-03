@@ -145,15 +145,18 @@ int main(int argc, char ** args) {
     int found = 0;
     i = 0;
 
-    #pragma omp parallel default(none) shared(STR, buffer, found, fd, len) firstprivate(i)
+    omp_set_num_threads(NTHRD);
+    #pragma omp parallel default(none) shared(STR, buffer, found, fd, len, i) 
     #pragma omp single
     while (buffer[i] && !found) {
         #pragma omp task 
-        if (!found && searchFile(&buffer[i], STR, BLOCK)) {
-            printFile(fd);
-            #pragma omp atomic
+        if (searchFile(&buffer[i], STR, BLOCK)) {
+            if (!found) {
                 found++;
-        }   
+                printFile(fd);
+                printf("%d %d\n", getpid(), omp_get_thread_num());
+            }
+        }
         i += BLOCK - len + 1;
     }
 
