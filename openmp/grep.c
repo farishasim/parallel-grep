@@ -45,7 +45,7 @@ List listing(char * path) {
         sprintf(d_path, "%s/%s", path, dir->d_name);
         if (dir->d_type != DT_DIR) // for files
         {
-            printf("%s\n", d_path);
+            // printf("%s\n", d_path);
             P->next = AlokNode(fileno(fopen(d_path, "r")));
             P = P->next;
             if (!L) L = P;
@@ -78,6 +78,16 @@ int searchFile(char * text, char * pattern, int length) {
     return 0; // false
 }
 
+int printFile(int fd) {
+    char filePath[BLOCK];
+    char result[BLOCK];
+    sprintf(filePath, "/proc/self/fd/%d", fd);
+    memset(result, 0, sizeof(result));
+    readlink(filePath, result, sizeof(result));
+    printf("%s\n", result);
+    return fd;
+}
+
 int main(int argc, char ** args) {
 
     char * STR;
@@ -85,7 +95,7 @@ int main(int argc, char ** args) {
     char buffer[FILESIZE];
     char * filename;
     ptr P; List L;
-    int child;
+    int child, i;
     filed fd; 
     
     if (argc < 4) {
@@ -131,13 +141,20 @@ int main(int argc, char ** args) {
     fd = P->info;
     FILE *fp = fdopen(fd, "rb");
     fread(buffer, 1, FILESIZE, fp);
-    if (searchFile(buffer, STR, FILESIZE)) {
-        char filePath[BLOCK];
-        char result[BLOCK];
-        sprintf(filePath, "/proc/self/fd/%d", fd);
-        memset(result, 0, sizeof(result));
-        readlink(filePath, result, sizeof(result));
-        printf("%s\n", result);
+    int len = strlen(STR);
+    int found = 0;
+    i = 0;
+
+    #pragma omp parallel default(none) shared(STR, buffer, found, fd, len) firstprivate(i)
+    #pragma omp single
+    while (buffer[i] && !found) {
+        #pragma omp task 
+        if (!found && searchFile(&buffer[i], STR, BLOCK)) {
+            printFile(fd);
+            #pragma omp atomic
+                found++;
+        }   
+        i += BLOCK - len + 1;
     }
 
     return 0;
