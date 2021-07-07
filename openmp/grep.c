@@ -70,7 +70,7 @@ int searchFile(char * text, char * pattern, int length) {
     // length : of text
     int i,j;
     for(i = 0; i < length; i++) {
-        for(j = 0; pattern[j] != '\0'; j++) {
+        for(j = 0; pattern[j] && text[i+j]; j++) {
             if (text[i+j] != pattern[j]) break;
         }
         if (pattern[j] == '\0') return 1; // true
@@ -108,6 +108,7 @@ int main(int argc, char ** args) {
     NTHRD = atoi(args[2]);
     STR = args[3];
     L = listing(".");
+    int start = omp_get_wtime();
 
     //*** PARENT SECTION ***//
     P = L; child = 0;
@@ -122,6 +123,7 @@ int main(int argc, char ** args) {
         if (child == NPROC) {
             int stat;
             cid = wait(&stat);
+            // printf("%d\n", stat);
             child--;
         }
         P = P->next;
@@ -134,6 +136,7 @@ int main(int argc, char ** args) {
         child--;
     }
     
+    printf("Program ended in %f seconds.\n", omp_get_wtime()-start);
     exit(0);
     
     //*** CHILD SECTION ***//
@@ -154,25 +157,11 @@ int main(int argc, char ** args) {
             if (!found) {
                 found++;
                 printFile(fd);
-                printf("%d %d\n", getpid(), omp_get_thread_num());
+                // printf("%d %d\n", getpid(), omp_get_thread_num());
             }
         }
-        i += BLOCK - len + 1;
+        i += BLOCK;
     }
 
     return 0;
 }
-
-// void test(int ID) {
-//     // parallelism for string search in a file
-//     omp_set_num_threads(NTHRD);
-//     #pragma omp parallel
-//     {
-//     printf("hello(%d)", ID);
-//     printf(" world(%d)\n", ID);
-//     #pragma omp barrier
-//     #pragma omp single
-//     printf("All thread is : %d\n", omp_get_num_threads());
-//     }
-//     return;
-// }

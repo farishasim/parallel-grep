@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd openmp
+cd $1
 ./compile.sh
 cd ..
-mv openmp/grep .
+mv $1/grep .
